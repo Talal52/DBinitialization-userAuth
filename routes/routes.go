@@ -10,9 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupRoutes initializes the API routes.
 func SetupRoutes(router *gin.Engine, db *database.DB) {
-	// API routes
 	router.POST("/users", func(c *gin.Context) {
 		var newUser database.User
 		if err := c.ShouldBindJSON(&newUser); err != nil {

@@ -27,7 +27,7 @@ func main() {
 	routes.SetupRoutes(router, db)
 
 	// Run the server
-	fmt.Println("Starting the server on :8080...")
+	fmt.Println("Starting the server on :4000...")
 	if err := router.Run(":4000"); err != nil {
 		log.Fatal("Failed to start the server:", err)
 	}

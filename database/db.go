@@ -2,27 +2,30 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/lib/pq"
 )
 
 type User struct {
-	ID       int    `json:"id"`
+	Id       int    `json:"id"`
 	Username string `json:"username"`
+	Password string `json:"password"`
 	Email    string `json:"email"`
 }
 
-// DB represents the database connection.
 type DB struct {
 	*sql.DB
 }
 
-// InitializeDB initializes the database connection.
 func InitializeDB() (*DB, error) {
-	// Replace these values with your actual database connection details
-	db, err := sql.Open("postgres", "user=your_username dbname=your_database sslmode=disable")
+
+	os.Unsetenv("PGLOCALEDIR")
+
+	db, err := sql.Open("postgres", "user=postgres password=12345 dbname=MyDatabase sslmode=disable")
 	if err != nil {
 		fmt.Println("error 1", err)
 		return nil, err
@@ -31,21 +34,33 @@ func InitializeDB() (*DB, error) {
 	return &DB{db}, nil
 }
 
-// CreateUser creates a new user in the database.
+// func (db *DB) CreateUser(user User) (int, error) {
+// 	var userID int
+// 	err := db.QueryRow("INSERT INTO \"user\" (\"Id\", \"username\", \"password\", \"email\") VALUES ($1, $2, $3, $4) RETURNING \"Id\"", user.Id, user.Username, user.Password, user.Email).Scan(&userID)
+// 	if err != nil {
+// 		fmt.Println("error 2", err)
+// 		return 0, err
+// 	}
+// 	return userID, nil
+// }
+
 func (db *DB) CreateUser(user User) (int, error) {
 	var userID int
-	err := db.QueryRow("INSERT INTO users(username, email) VALUES($1, $2) RETURNING id", user.Username, user.Email).Scan(&userID)
+	query := "INSERT INTO \"user\" (\"username\", \"password\", \"email\") VALUES ($1, $2, $3) RETURNING \"Id\""
+
+	err := db.QueryRowContext(context.Background(), query, user.Username, user.Password, user.Email).Scan(&userID)
+
 	if err != nil {
-		fmt.Println("error 2", err)
+		fmt.Println("Error creating user:", err)
 		return 0, err
 	}
+
 	return userID, nil
 }
 
-// GetUserByID retrieves a user from the database by ID.
 func (db *DB) GetUserByID(userID int) (User, error) {
 	var user User
-	err := db.QueryRow("SELECT id, username, email FROM users WHERE id = $1", userID).Scan(&user.ID, &user.Username, &user.Email)
+	err := db.QueryRow("SELECT \"Id\", \"username\", \"email\" FROM \"user\" WHERE \"Id\" = $1", userID).Scan(&user.Id, &user.Username, &user.Email)
 	if err != nil {
 		fmt.Println("error", err)
 		return User{}, err
