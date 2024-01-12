@@ -20,11 +20,14 @@ func main() {
 		log.Fatal("Could not initialize the database:", err)
 	}
 
+	// Your JWT secret key
+	jwtSecret := "your-secret-key"
+
 	// Initialize Gin
 	router := gin.Default()
 
-	// Set up routes
-	routes.SetupRoutes(router, db)
+	// Set up routes with the JWT secret
+	routes.SetupRoutes(router, db, jwtSecret)
 
 	// Run the server
 	fmt.Println("Starting the server on :4000...")
